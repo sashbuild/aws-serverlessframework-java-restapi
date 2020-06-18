@@ -1,21 +1,12 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
 service: employee-serverless-restapi
 
 provider:
   name: aws
   runtime: java8
+  # you can overwrite defaults here
+  #  stage: dev
+  #  region: us-east-1
+  #This adds the required permissions to the IAM Lambda role to access DynamoDB
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -28,6 +19,7 @@ provider:
       Resource:
         - { "Fn::GetAtt": ["employeeTable", "Arn" ] }
 
+#You can add your environment variables here
 environment:
    variable1: value1
 
@@ -35,7 +27,7 @@ package:
   artifact: target/employee-serverless-restapi-${self:provider.stage}.jar
 
 functions:
-  createEmployees:
+  createEmployee:
     handler: com.serverless.CreateEmployeeHandler
     events:
       - http:
@@ -50,6 +42,7 @@ functions:
 
 resources:
   Resources:
+    #Create DynamoDB Table
     employeeTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -60,8 +53,10 @@ resources:
           - AttributeName: name
             AttributeType: S
         KeySchema:
+          #DynamoDB Partition Key
           - AttributeName: id
             KeyType: HASH
+          #DynamoDB Sort Key
           - AttributeName: name
             KeyType: RANGE
         ProvisionedThroughput:
